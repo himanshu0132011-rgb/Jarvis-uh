@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080d16">
+<meta name="description" content="A mobile-friendly JARVIS timer with voice commands and manual controls.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>JARVIS — Voice Timer</title>
+<style>
+:root{color-scheme:dark;--bg:#080d16;--panel:#101827;--panel2:#0b1320;--line:#24364c;--cyan:#55d9ff;--text:#eef6ff;--muted:#9aadc3;--green:#68f0b0;--red:#ff6b81;}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(ellipse at top,#11263c 0,#080d16 48%,#060910 100%);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom)}
+main{width:min(680px,100%);margin:0 auto;padding:20px 0 32px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}.brand{display:flex;align-items:center;gap:11px}.orb{width:42px;height:42px;border:1px solid #4edfff;border-radius:50%;display:grid;place-items:center;box-shadow:0 0 20px #1ba9d655,inset 0 0 14px #1ba9d633;color:var(--cyan);font-weight:800;font-size:12px;letter-spacing:1px}.brand h1{font-size:19px;letter-spacing:3px;margin:0}.brand p{font-size:11px;color:var(--muted);margin:1px 0 0;letter-spacing:1.3px}.status{font-size:11px;font-weight:800;letter-spacing:1px;padding:7px 9px;border:1px solid var(--line);border-radius:999px;color:var(--muted);white-space:nowrap}.status.on{color:var(--green);border-color:#286b56;background:#0b2a25}.status.awake{color:var(--cyan);border-color:#27617a;background:#0a2633}
+.panel{border:1px solid var(--line);background:linear-gradient(145deg,#111c2cdd,#0c1421f2);border-radius:20px;padding:20px;margin-bottom:14px;box-shadow:0 12px 35px #0003}.eyebrow{font-size:11px;color:var(--cyan);font-weight:800;letter-spacing:2px;text-transform:uppercase;margin:0 0 8px}.headline{font-size:25px;line-height:1.15;margin:0 0 8px}.muted{color:var(--muted);font-size:14px;margin:0}.listenrow{display:flex;align-items:center;gap:14px;margin-top:18px}.listen{width:64px;height:64px;border:1px solid #4bd9ff;border-radius:50%;background:radial-gradient(circle,#163b52,#0a1b2b);color:var(--cyan);font-size:24px;flex-shrink:0;box-shadow:0 0 22px #28b9ea22}.listen.listening{border-color:var(--green);color:var(--green);animation:pulse 1.7s infinite}.listen-copy{flex:1;min-width:0}.listen-copy strong{display:block;font-size:15px;margin-bottom:4px}.listen-copy span{display:block;font-size:13px;color:var(--muted)}
+@keyframes pulse{50%{box-shadow:0 0 0 9px #68f0b014,0 0 25px #68f0b044}}
+.timer-face{display:flex;align-items:center;justify-content:space-between;gap:12px}.time{font-variant-numeric:tabular-nums;font-size:clamp(38px,10vw,60px);line-height:1.05;font-weight:750;letter-spacing:1px}.timer-label{font-size:12px;color:var(--muted);margin-top:8px}.timer-bubble{width:74px;height:74px;border-radius:50%;border:1px solid #2d7390;display:grid;place-items:center;color:var(--cyan);font-size:29px;background:#0a2130;flex-shrink:0}.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}.btn{border:1px solid #2e4862;background:#142338;color:var(--text);border-radius:12px;padding:11px 14px;font-weight:700;font-size:14px;min-height:44px}.btn:active{transform:scale(.98)}.btn.primary{color:#06131b;background:var(--cyan);border-color:var(--cyan)}.btn.danger{color:#ff9ead;border-color:#733648;background:#2a1520}.btn:disabled{opacity:.4}
+.presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:15px}.preset{border:1px solid var(--line);border-radius:13px;background:#0b1523;padding:13px 4px;text-align:center;color:var(--text);font-weight:750;min-height:54px}.preset small{display:block;font-size:10px;color:var(--muted);font-weight:600;margin-top:2px}.custom{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:14px;align-items:end}.field label{display:block;font-size:12px;color:var(--muted);margin:0 0 5px}.field input{width:100%;height:44px;background:#080f1b;border:1px solid var(--line);border-radius:10px;color:var(--text);font:inherit;padding:0 10px}.section-title{font-size:15px;font-weight:800;margin:0 0 5px}.transcript{font-size:13px;color:var(--muted);min-height:20px;overflow-wrap:anywhere;margin-top:10px}.help{display:grid;gap:7px;margin-top:13px}.example{border:1px solid #1c3045;background:#0a1320;border-radius:9px;padding:8px 10px;color:#c6d9ec;font-size:13px}.warning{font-size:12px;line-height:1.5;color:#b9c7d8;margin-top:12px;padding:11px 12px;border-left:2px solid #e9b55f;background:#1d1a14;border-radius:0 9px 9px 0}.footer{text-align:center;color:#71849b;font-size:11px;margin:18px 4px 0}
+@media(max-width:390px){.panel{padding:16px}.presets{grid-template-columns:repeat(2,minmax(0,1fr))}.custom{grid-template-columns:1fr 1fr}.custom .btn{grid-column:1/-1}.headline{font-size:23px}}
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div class="brand"><div class="orb">AI</div><div><h1>J.A.R.V.I.S.</h1><p>VOICE TIMER SYSTEM</p></div></div>
+    <div style="display:flex;align-items:center;gap:8px"><div id="status" class="status">MIC OFF</div><button class="btn" id="installButton" style="padding:7px 9px;min-height:0;font-size:11px">INSTALL</button></div>
+  </header>
+
+  <section class="panel">
+    <p class="eyebrow">Voice interface</p>
+    <h2 class="headline" id="assistantHeadline">Ready when you are.</h2>
+    <p class="muted" id="assistantMessage">Open the microphone, then say “Jarvis” to wake me.</p>
+    <div class="listenrow">
+      <button id="listenButton" class="listen" aria-label="Start listening">▶</button>
+      <div class="listen-copy"><strong id="listenTitle">Tap to start listening</strong><span id="listenDescription">Keep this page open in the foreground.</span></div>
+    </div>
+    <div id="transcript" class="transcript" aria-live="polite">Last heard: nothing yet</div>
+    <div class="warning">Browser limitation: this page cannot wake itself while closed, and Android may stop microphone listening when the screen locks or the page goes into the background. Keep this page open and listening. For reliable locked-screen wake words, you need a native Android app with a foreground service.</div>
+  </section>
+
+  <section class="panel">
+    <p class="eyebrow">Active timer</p>
+    <div class="timer-face"><div><div id="timeDisplay" class="time">00:00</div><div id="timerLabel" class="timer-label">No timer running</div></div><div class="timer-bubble" id="timerIcon">◷</div></div>
+    <div class="controls">
+      <button class="btn" id="pauseButton" disabled>Pause</button>
+      <button class="btn" id="resumeButton" disabled>Resume</button>
+      <button class="btn danger" id="stopButton" disabled>Stop timer</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <p class="eyebrow">Manual control</p>
+    <h2 class="section-title">Start a timer by hand</h2>
+    <p class="muted">These buttons work even if voice recognition is unavailable.</p>
+    <div class="presets">
+      <button class="preset" data-seconds="60">1 min<small>Quick</small></button>
+      <button class="preset" data-seconds="240">4 min<small>Focus</small></button>
+      <button class="preset" data-seconds="300">5 min<small>Short break</small></button>
+      <button class="preset" data-seconds="3600">1 hour<small>Long session</small></button>
+    </div>
+    <div class="custom">
+      <div class="field"><label for="hours">Hours</label><input id="hours" type="number" min="0" max="99" inputmode="numeric" value="0"></div>
+      <div class="field"><label for="minutes">Minutes</label><input id="minutes" type="number" min="0" max="59" inputmode="numeric" value="10"></div>
+      <button id="customStart" class="btn primary">Start</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <p class="eyebrow">Voice commands</p>
+    <h2 class="section-title">Say “Jarvis”, then give a command</h2>
+    <div class="help">
+      <div class="example">“Jarvis” → “Set a timer for 4 minutes.”</div>
+      <div class="example">“Jarvis, set a timer for 5 minutes.”</div>
+      <div class="example">“Jarvis, set a timer for 1 hour.”</div>
+      <div class="example">“Jarvis, pause timer.” / “Resume timer.” / “Stop timer.”</div>
+      <div class="example">“Jarvis, how much time is left?”</div>
+    </div>
+  </section>
+  <div class="footer">JARVIS Voice Timer · Installable web app · No account required</div>
+</main>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const statusEl = $('status');
+  const listenButton = $('listenButton');
+  const transcriptEl = $('transcript');
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let shouldListen = false;
+  let awakeUntil = 0;
+  let restartTimer = null;
+  let wakeLock = null;
+  let timerInterval = null;
+  let timerEndAt = 0;
+  let remainingMs = 0;
+  let timerState = 'idle';
+  let alarmAudio = null;
+  let alarmInterval = null;
+  function primeAudio() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx && !alarmAudio) alarmAudio = new AudioCtx();
+      if (alarmAudio && alarmAudio.state === 'suspended') alarmAudio.resume().catch(() => {});
+    } catch (_) {}
+  }
+
+  function speak(message) {
+    if (!('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(message);
+      utterance.lang = 'en-IN';
+      utterance.rate = 1.03;
+      window.speechSynthesis.speak(utterance);
+    } catch (_) {}
+  }
+  function setStatus(text, type='') {
+    statusEl.textContent = text;
+    statusEl.className = 'status' + (type ? ' ' + type : '');
+  }
+  function setAssistant(headline, message) {
+    $('assistantHeadline').textContent = headline;
+    $('assistantMessage').textContent = message;
+  }
+  function renderListening() {
+    listenButton.classList.toggle('listening', shouldListen);
+    listenButton.textContent = shouldListen ? '■' : '▶';
+    listenButton.setAttribute('aria-label', shouldListen ? 'Stop listening' : 'Start listening');
+    $('listenTitle').textContent = shouldListen ? 'Listening for “Jarvis”…' : 'Tap to start listening';
+    $('listenDescription').textContent = shouldListen ? 'Wake phrase detection is active while this page stays open.' : 'Voice mode is off. Manual timers still work.';
+    if (!shouldListen) setStatus('MIC OFF');
+    else if (Date.now() < awakeUntil) setStatus('AWAKE', 'awake');
+    else setStatus('LISTENING', 'on');
+  }
+  async function acquireWakeLock() {
+    try { if ('wakeLock' in navigator && document.visibilityState === 'visible') wakeLock = await navigator.wakeLock.request('screen'); } catch (_) {}
+  }
+  async function releaseWakeLock() {
+    try { if (wakeLock) await wakeLock.release(); } catch (_) {}
+    wakeLock = null;
+  }
+  function startListening() {
+    primeAudio();
+    if (!SR) {
+      setAssistant('Voice recognition is not available here.', 'Use the manual timer buttons below, or open this file in a supported version of Chrome.');
+      transcriptEl.textContent = 'Last heard: browser does not expose SpeechRecognition.';
+      return;
+    }
+    if (shouldListen) return;
+    shouldListen = true;
+    renderListening();
+    setAssistant('Standing by.', 'Say “Jarvis” to wake me, then say your timer command.');
+    acquireWakeLock();
+    try { recognition.start(); } catch (err) { scheduleRestart(); }
+  }
+  function stopListening() {
+    shouldListen = false;
+    awakeUntil = 0;
+    clearTimeout(restartTimer);
+    if (recognition) { try { recognition.stop(); } catch (_) {} }
+    releaseWakeLock();
+    renderListening();
+    setAssistant('Voice mode stopped.', 'You can still start, pause, resume, or stop timers manually.');
+  }
+  function scheduleRestart() {
+    clearTimeout(restartTimer);
+    if (!shouldListen) return;
+    restartTimer = setTimeout(() => {
+      if (!shouldListen || !recognition) return;
+      try { recognition.start(); } catch (_) { scheduleRestart(); }
+    }, 550);
+  }
+  function initRecognition() {
+    if (!SR) return;
+    recognition = new SR();
+    recognition.lang = 'en-IN';
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = event => {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (!event.results[i].isFinal) continue;
+        const phrase = (event.results[i][0].transcript || '').trim();
+        if (!phrase) continue;
+        transcriptEl.textContent = 'Last heard: “' + phrase + '”';
+        processVoice(phrase);
+      }
+    };
+    recognition.onerror = event => {
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        shouldListen = false; renderListening(); releaseWakeLock();
+        setAssistant('Microphone permission blocked.', 'Allow microphone access for this page in Chrome settings, then tap the button again.');
+      } else if (event.error === 'network') {
+        transcriptEl.textContent = 'Voice service network error. Check your internet connection; manual timers still work.';
+      }
+    };
+    recognition.onend = () => { if (shouldListen) scheduleRestart(); };
+  }
+  const wordNumbers = {
+    zero:0, one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10,
+    eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16, seventeen:17,
+    eighteen:18, nineteen:19, twenty:20, thirty:30, forty:40, fifty:50, sixty:60
+  };
+  const compoundWords = {};
+  const tens = {twenty:20, thirty:30, forty:40, fifty:50};
+  const ones = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9};
+  Object.entries(tens).forEach(([t,n]) => Object.entries(ones).forEach(([o,v]) => compoundWords[t+' '+o] = n+v));
+  function numericize(text) {
+    let s = text.toLowerCase().replace(/\b(an?|a)\s+(?=(?:hours?|hrs?|minutes?|mins?|seconds?|secs?)\b)/g, '1 ');
+    for (const [phrase, value] of Object.entries(compoundWords).sort((a,b) => b[0].length-a[0].length)) {
+      s = s.replace(new RegExp('\\b'+phrase.replace(' ','\\s+')+'\\b','g'), String(value));
+    }
+    for (const [word,value] of Object.entries(wordNumbers).sort((a,b)=>b[0].length-a[0].length)) {
+      s = s.replace(new RegExp('\\b'+word+'\\b','g'), String(value));
+    }
+    return s;
+  }
+  function parseDuration(text) {
+    const s = numericize(text);
+    const re = /\b(\d+)\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)\b/g;
+    let m, total = 0, found = false;
+    while ((m = re.exec(s)) !== null) {
+      found = true;
+      const value = Number(m[1]);
+      const unit = m[2];
+      if (/^h|^hr/.test(unit)) total += value * 3600;
+      else if (/^m|min/.test(unit)) total += value * 60;
+      else total += value;
+    }
+    return found && total > 0 && Number.isFinite(total) ? total : 0;
+  }
+  function processVoice(raw) {
+    if (!shouldListen) return;
+    const original = raw.toLowerCase();
+    const containsWake = /\bjarvis\b/.test(original);
+    let command = original;
+    if (containsWake) {
+      awakeUntil = Date.now() + 18000;
+      command = command.replace(/\bjarvis\b/g, ' ').replace(/\b(wake up|hey|please)\b/g, ' ').trim();
+      renderListening();
+      if (!command) {
+        setAssistant('I’m awake.', 'Say “set a timer for 4 minutes” or another command.');
+        speak('I am awake. What do you need?');
+        return;
+      }
+    } else if (Date.now() > awakeUntil) {
+      renderListening();
+      return;
+    }
+    if (/\b(stop|cancel|clear)\b/.test(command) && /\btimer\b/.test(command)) {
+      stopTimer(); setAssistant('Timer stopped.', 'Standing by for your next command.'); speak('Timer stopped.'); return;
+    }
+    if (/\b(pause|hold)\b/.test(command) && /\btimer\b/.test(command)) {
+      pauseTimer(); speak(timerState === 'paused' ? 'Timer paused.' : 'There is no running timer to pause.'); return;
+    }
+    if (/\b(resume|continue|restart)\b/.test(command) && /\btimer\b/.test(command)) {
+      resumeTimer(); speak(timerState === 'running' ? 'Timer resumed.' : 'There is no paused timer.'); return;
+    }
+    if (/\b(how much time|time left|remaining time)\b/.test(command)) {
+      const seconds = timerState === 'running' ? Math.max(0, Math.ceil((timerEndAt-Date.now())/1000)) : timerState === 'paused' ? Math.ceil(remainingMs/1000) : 0;
+      if (seconds) { const phrase = formatSpoken(seconds) + ' remaining.'; setAssistant('Time remaining: ' + formatTime(seconds), phrase); speak(phrase); }
+      else { setAssistant('No active timer.', 'Tell me to set a timer, or use the manual controls.'); speak('There is no active timer.'); }
+      return;
+    }
+    const seconds = parseDuration(command);
+    if (seconds && /\b(timer|countdown)\b/.test(command)) {
+      startTimer(seconds);
+      const msg = 'Timer set for ' + formatSpoken(seconds) + '.';
+      setAssistant('Timer started.', msg);
+      speak(msg);
+      return;
+    }
+    if (containsWake) {
+      setAssistant('I’m awake, but I missed the command.', 'Try: “Jarvis, set a timer for 5 minutes.”');
+      speak('Please repeat the timer command.');
+    }
+  }
+  function formatTime(totalSeconds) {
+    const s = Math.max(0, Math.ceil(totalSeconds));
+    const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+    if (h > 0) return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+    return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+  }
+  function formatSpoken(totalSeconds) {
+    let s = Math.max(0, Math.round(totalSeconds));
+    const h = Math.floor(s/3600); s %= 3600;
+    const m = Math.floor(s/60); s %= 60;
+    const parts = [];
+    if (h) parts.push(h+' hour'+(h===1?'':'s'));
+    if (m) parts.push(m+' minute'+(m===1?'':'s'));
+    if (s && !h) parts.push(s+' second'+(s===1?'':'s'));
+    return parts.join(' and ') || '0 seconds';
+  }
+  function updateTimer() {
+    if (timerState !== 'running') return;
+    const seconds = Math.max(0, Math.ceil((timerEndAt - Date.now())/1000));
+    $('timeDisplay').textContent = formatTime(seconds);
+    $('timerLabel').textContent = 'Timer running';
+    if (seconds <= 0) finishTimer();
+  }
+  function startTimer(seconds) {
+    stopAlarm();
+    clearInterval(timerInterval);
+    remainingMs = Math.max(1, seconds) * 1000;
+    timerEndAt = Date.now() + remainingMs;
+    timerState = 'running';
+    $('timerIcon').textContent = '◴';
+    $('pauseButton').disabled = false; $('resumeButton').disabled = true; $('stopButton').disabled = false;
+    setAssistant('Timer started.', 'I’ll alert you when it finishes.');
+    updateTimer();
+    timerInterval = setInterval(updateTimer, 250);
+  }
+  function pauseTimer() {
+    if (timerState !== 'running') return;
+    remainingMs = Math.max(0, timerEndAt - Date.now());
+    timerState = 'paused'; clearInterval(timerInterval);
+    $('timeDisplay').textContent = formatTime(Math.ceil(remainingMs/1000));
+    $('timerLabel').textContent = 'Timer paused'; $('timerIcon').textContent = 'Ⅱ';
+    $('pauseButton').disabled = true; $('resumeButton').disabled = false; $('stopButton').disabled = false;
+    setAssistant('Timer paused.', 'Say “Jarvis, resume timer” when you’re ready.');
+  }
+  function resumeTimer() {
+    if (timerState !== 'paused') return;
+    timerEndAt = Date.now() + remainingMs; timerState = 'running';
+    $('timerIcon').textContent = '◴'; $('pauseButton').disabled = false; $('resumeButton').disabled = true;
+    $('timerLabel').textContent = 'Timer running'; timerInterval = setInterval(updateTimer, 250); updateTimer();
+    setAssistant('Timer resumed.', 'Countdown is running.');
+  }
+  function stopTimer() {
+    clearInterval(timerInterval); timerInterval = null; stopAlarm(); timerState = 'idle'; remainingMs = 0; timerEndAt = 0;
+    $('timeDisplay').textContent = '00:00'; $('timerLabel').textContent = 'No timer running'; $('timerIcon').textContent = '◷';
+    $('pauseButton').disabled = true; $('resumeButton').disabled = true; $('stopButton').disabled = true;
+  }
+  function finishTimer() {
+    clearInterval(timerInterval); timerInterval = null; timerState = 'idle'; remainingMs = 0;
+    $('timeDisplay').textContent = '00:00'; $('timerLabel').textContent = 'Timer complete'; $('timerIcon').textContent = '✓';
+    $('pauseButton').disabled = true; $('resumeButton').disabled = true; $('stopButton').disabled = false;
+    setAssistant('Timer complete.', 'Your time is up.'); startAlarm(); speak('Your timer is finished.');
+  }
+  function startAlarm() {
+    stopAlarm();
+    primeAudio();
+    try {
+      const beep = () => {
+        if (!alarmAudio) return;
+        if (alarmAudio.state === 'suspended') alarmAudio.resume().catch(() => {});
+        const osc = alarmAudio.createOscillator(), gain = alarmAudio.createGain();
+        osc.type = 'sine'; osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.0001, alarmAudio.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.18, alarmAudio.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, alarmAudio.currentTime + 0.32);
+        osc.connect(gain); gain.connect(alarmAudio.destination); osc.start(); osc.stop(alarmAudio.currentTime + 0.34);
+      };
+      beep(); alarmInterval = setInterval(beep, 800);
+    } catch (_) {}
+    if (navigator.vibrate) { try { navigator.vibrate([300,150,300,150,700]); } catch (_) {} }
+  }
+  function stopAlarm() {
+    clearInterval(alarmInterval); alarmInterval = null;
+    if (navigator.vibrate) { try { navigator.vibrate(0); } catch (_) {} }
+  }
+  listenButton.addEventListener('click', () => shouldListen ? stopListening() : startListening());
+  $('pauseButton').addEventListener('click', pauseTimer);
+  $('resumeButton').addEventListener('click', resumeTimer);
+  $('stopButton').addEventListener('click', () => { stopTimer(); setAssistant('Timer stopped.', 'Set another timer whenever you’re ready.'); });
+  document.querySelectorAll('[data-seconds]').forEach(button => button.addEventListener('click', () => startTimer(Number(button.dataset.seconds))));
+  $('customStart').addEventListener('click', () => {
+    const h = Math.max(0, Math.min(99, Number($('hours').value) || 0));
+    const m = Math.max(0, Math.min(59, Number($('minutes').value) || 0));
+    const seconds = h*3600 + m*60;
+    if (!seconds) { setAssistant('Choose a duration first.', 'Enter at least 1 minute or 1 hour.'); return; }
+    startTimer(seconds); speak('Timer set for ' + formatSpoken(seconds) + '.');
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && shouldListen) acquireWakeLock();
+    if (document.visibilityState === 'visible' && timerState === 'running') updateTimer();
+  });
+  const installButton = $('installButton');
+  let deferredInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    installButton.textContent = 'INSTALL';
+  });
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    installButton.textContent = 'INSTALLED';
+    installButton.disabled = true;
+    setAssistant('JARVIS installed.', 'Open it from your home screen whenever you need a timer.');
+  });
+  installButton.addEventListener('click', async () => {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      try {
+        const result = await deferredInstallPrompt.userChoice;
+        if (result && result.outcome === 'accepted') installButton.textContent = 'INSTALLING';
+      } catch (_) {}
+      deferredInstallPrompt = null;
+    } else if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+      setAssistant('JARVIS is already installed.', 'Open it from your home screen.');
+    } else {
+      setAssistant('Install from Chrome menu.', 'Tap ⋮ in Chrome, then choose “Install app” or “Add to Home screen”.');
+    }
+  });
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+  initRecognition();
+  if (!SR) {
+    $('listenDescription').textContent = 'Voice recognition may not be supported in this browser.';
+    transcriptEl.textContent = 'Last heard: use manual timer controls if voice mode is unavailable.';
+  }
+})();
+</script>
+</body>
+</html>
